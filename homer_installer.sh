@@ -399,19 +399,19 @@ get_mysql_details() {
     read -p "Please enter the password for HOMER username '$homer_user_account': [default: '$sql_homer_pass'] " homer_user_password
     [[ -z "$homer_user_password" ]] && homer_user_password=$sql_homer_pass
 
-    # read -p "Please enter the database superuser username: [default: '$DB_ADMIN_USER'] " admin_user_account
-    # [[ -z "$admin_user_account" ]] && admin_user_account=$DB_ADMIN_USER
+    read -p "Please enter the database superuser username: [default: '$DB_ADMIN_USER'] " admin_user_account
+    [[ -z "$admin_user_account" ]] && admin_user_account=$DB_ADMIN_USER
 
-    # read -p "Please enter the password for database admin user '$DB_ADMIN_USER': " admin_user_password
-    # [[ -z "$admin_user_password" ]] && admin_user_password=$sql_root_pass
+    read -p "Please enter the password for database admin user '$DB_ADMIN_USER': " admin_user_password
+    [[ -z "$admin_user_password" ]] && admin_user_password=$sql_root_pass
 
     echo ""
     echo "  Database Host : $database_host"
     echo ""
     echo "  Homer Username: $homer_user_account"
     echo "  Homer Password: $homer_user_password"
-    # echo "  Admin Username: $DB_ADMIN_USER"
-    # echo "  Admin Password: $sql_admin_pass"
+    echo "  Admin Username: $DB_ADMIN_USER"
+    echo "  Admin Password: $sql_admin_pass"
     echo ""
     read -p "Please confirm the above details are correct [Y/n]" confirmation
 
@@ -422,7 +422,7 @@ get_mysql_details() {
   DB_HOST=$database_host
   DB_USER=$homer_user_account
   DB_PASS=$homer_user_password
-  # DB_ADMIN_USER=$admin_user_account
+  DB_ADMIN_USER=$admin_user_account
   DB_ADMIN_PASS=$sql_admin_pass
 
   (
@@ -469,6 +469,7 @@ mysql_ready() {
 }
 
 mysql_secure() {
+return 0
   # This function sets the database superuser password to that of the password given
   # by the user in a previous step, it then goes and "secures" mysql in a similar 
   # fashion to that of "mysql_secure_installtion"
@@ -521,16 +522,16 @@ mysql_load() {
   local cmd_sed=$(locate_cmd "sed")
   local cmd_mysql=$(locate_cmd "mysql")
 
-  if [[ x"$lower_mysql_pass_validation"x == x"yes"x ]]; then
-    $cmd_mysql --user="$DB_ADMIN_USER" --password="$DB_ADMIN_PASS" -e \
-      "SET GLOBAL validate_password_policy=LOW;"
-    check_status "$?"
-    echo "validate_password_policy=LOW" >> /etc/my.cnf
-  fi
+  #if [[ x"$lower_mysql_pass_validation"x == x"yes"x ]]; then
+  #  $cmd_mysql --user="$DB_ADMIN_USER" --password="$DB_ADMIN_PASS" -e \
+  #    "SET GLOBAL validate_password_policy=LOW;"
+  #  check_status "$?"
+  #  echo "validate_password_policy=LOW" >> /etc/my.cnf
+  #fi
 
-  $cmd_mysql --user="$DB_ADMIN_USER" --password="$DB_ADMIN_PASS" -e \
-    "GRANT ALL ON *.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASS'; FLUSH PRIVILEGES;"
-  check_status "$?"
+  #$cmd_mysql --user="$DB_ADMIN_USER" --password="$DB_ADMIN_PASS" -e \
+  #  "GRANT ALL ON *.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASS'; FLUSH PRIVILEGES;"
+  #check_status "$?"
 
   # Fixup passwords to get rid of mysql low policy errors
   $cmd_sed -i -e "s/test123/test1234/g" -e "s/123test/1234test/g" $mysql_ddl_dir/schema_configuration.sql
